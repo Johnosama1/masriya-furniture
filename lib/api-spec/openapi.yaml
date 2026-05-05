@@ -1,0 +1,300 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: API specification for Al-Masriya Furniture
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: products
+    description: Furniture products
+  - name: categories
+    description: Product categories
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      description: Returns server health status
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  /products:
+    get:
+      operationId: listProducts
+      tags: [products]
+      summary: List all products
+      parameters:
+        - name: category
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [children, adult, living, videos]
+        - name: subcategory
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of products
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Product"
+    post:
+      operationId: createProduct
+      tags: [products]
+      summary: Create a product
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateProductBody"
+      responses:
+        "201":
+          description: Created product
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+
+  /products/{id}:
+    get:
+      operationId: getProduct
+      tags: [products]
+      summary: Get a single product
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Product
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+        "404":
+          description: Not found
+    put:
+      operationId: updateProduct
+      tags: [products]
+      summary: Update a product
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateProductBody"
+      responses:
+        "200":
+          description: Updated product
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+    delete:
+      operationId: deleteProduct
+      tags: [products]
+      summary: Delete a product
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                required:
+                  - success
+
+  /categories/summary:
+    get:
+      operationId: getCategoriesSummary
+      tags: [categories]
+      summary: Get categories with product counts
+      responses:
+        "200":
+          description: Categories summary
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CategorySummary"
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+
+    Product:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        nameEn:
+          type: string
+        description:
+          type: string
+        price:
+          type: number
+          nullable: true
+        discountPercent:
+          type: integer
+          nullable: true
+        category:
+          type: string
+          enum: [children, adult, living, videos]
+        subcategory:
+          type: string
+          nullable: true
+        measurements:
+          type: string
+          nullable: true
+        images:
+          type: array
+          items:
+            type: string
+        videoUrl:
+          type: string
+          nullable: true
+        sortOrder:
+          type: integer
+        createdAt:
+          type: string
+      required:
+        - id
+        - name
+        - nameEn
+        - description
+        - category
+        - images
+        - sortOrder
+        - createdAt
+
+    CreateProductBody:
+      type: object
+      properties:
+        name:
+          type: string
+        nameEn:
+          type: string
+        description:
+          type: string
+        price:
+          type: number
+          nullable: true
+        discountPercent:
+          type: integer
+          nullable: true
+        category:
+          type: string
+          enum: [children, adult, living, videos]
+        subcategory:
+          type: string
+          nullable: true
+        measurements:
+          type: string
+          nullable: true
+        images:
+          type: array
+          items:
+            type: string
+        videoUrl:
+          type: string
+          nullable: true
+        sortOrder:
+          type: integer
+      required:
+        - name
+        - nameEn
+        - description
+        - category
+        - images
+
+    UpdateProductBody:
+      type: object
+      properties:
+        name:
+          type: string
+        nameEn:
+          type: string
+        description:
+          type: string
+        price:
+          type: number
+          nullable: true
+        discountPercent:
+          type: integer
+          nullable: true
+        category:
+          type: string
+          enum: [children, adult, living, videos]
+        subcategory:
+          type: string
+          nullable: true
+        measurements:
+          type: string
+          nullable: true
+        images:
+          type: array
+          items:
+            type: string
+        videoUrl:
+          type: string
+          nullable: true
+        sortOrder:
+          type: integer
+
+    CategorySummary:
+      type: object
+      properties:
+        category:
+          type: string
+        count:
+          type: integer
+        label:
+          type: string
+      required:
+        - category
+        - count
+        - label
